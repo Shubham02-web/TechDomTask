@@ -51,7 +51,7 @@ export const approveLoan = async function (req, res, next) {
         message: "Loan is not found for these id Please enter valid id",
       });
     if (loan.state === "APPROVED")
-      return res.status(500).send({
+      return res.status(500).json({
         success: false,
         message: "Your Loan has allready approved",
       });
@@ -65,7 +65,7 @@ export const approveLoan = async function (req, res, next) {
     });
   } catch (error) {
     console.log("Error in Loan Approved API");
-    res.status(500).send({
+    res.status(500).json({
       success: false,
       message: `error in Loan Approved API ${error.message}`,
     });
@@ -100,7 +100,29 @@ export const viewSingleLoan = async function (req, res) {
 };
 // controller for all view details of Loan
 
-export const viewLoanDetails = async function (req, res, next) {};
+export const viewLoanDetails = async function (req, res, next) {
+  try {
+    // finding all Loan
+    const Loans = await LoanModel.find();
+    if (!Loans)
+      return res.status(500).json({
+        success: false,
+        message: "There in no Loan",
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "list of all Loans",
+      Loans,
+    });
+  } catch (error) {
+    console.log("error in find all Loans API");
+    res.status(500).json({
+      success: false,
+      message: `Error in find all Loans  ${error.message}`,
+    });
+  }
+};
 
 // Controller for repayment Route
 
