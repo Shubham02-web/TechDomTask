@@ -41,7 +41,32 @@ export const CreateLoan = async function (req, res, next) {
 };
 
 // controller for Loan approve Route
-export const approveLoan = async function (req, res, next) {};
+export const approveLoan = async function (req, res, next) {
+  try {
+    const id = req.params.id;
+    if (!id) return res.status(500).json("Plese enter id");
+    const loan = await LoanModel.findById(id);
+    if (!loan)
+      return res.status(500).json({
+        success: false,
+        message: "Loan is not found for these id Please enter valid id",
+      });
+    loan.state = "APPROVED";
+    await loan.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Your Loan Approved Successfully",
+      loan,
+    });
+  } catch (error) {
+    console.log("Error in Loan Approved API");
+    res.status(500).send({
+      success: false,
+      message: `error in Loan Approved API ${error.message}`,
+    });
+  }
+};
 
 // controller for view details of Loan
 
