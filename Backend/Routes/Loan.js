@@ -7,6 +7,7 @@ import {
   RepaymentsRoute,
   approveLoan,
   viewLoanDetails,
+  viewSingleLoan,
 } from "../controller/Loan.js";
 
 // route for creating Loan /api/loan/create
@@ -19,6 +20,9 @@ router.patch("/approve/:id", approveLoan);
 router.post("/repayment/:id", RepaymentsRoute);
 
 // route for viewLoan Details
-router.get("/viewLoan", viewLoanDetails);
+router.get("/AllLoan", viewLoanDetails);
+
+// route for single Loan Detailss
+router.get("/viewLoan/:id", viewSingleLoan);
 
 // Exporting Route
