@@ -1,6 +1,6 @@
 // Import express and creating express Router
 import express from "express";
-const router = express.Router();
+export const router = express.Router();
 // accessing Controllers
 import {
   CreateLoan,
@@ -22,4 +22,3 @@ router.post("/repayment/:id", RepaymentsRoute);
 router.get("/viewLoan", viewLoanDetails);
 
 // Exporting Route
-module.exports = router;

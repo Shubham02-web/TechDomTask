@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 // Schema Defining for Loan
-const LoanSchema = new mongoose.Schema({
+const LoanSchema = mongoose.Schema({
   //   field Loan Amount
   amount: {
     type: Number,
@@ -43,5 +43,4 @@ const LoanSchema = new mongoose.Schema({
 });
 
 // creating and exporting Loan Model
-const LoanModel = mongoose.model("LoanAPP", LoanSchema);
-module.exports = LoanModel;
+export const LoanModel = mongoose.model("LoanAPP", LoanSchema);

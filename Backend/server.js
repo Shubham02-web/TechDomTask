@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import LoanRouter from "./Routes/Loan.js";
+import { router } from "./Routes/Loan.js";
 // config dotenv for Load Environment variables from .env file
 dotenv.config();
 
@@ -23,7 +23,7 @@ mongoose
   .catch((err) => console.log(`Error in conecting mongoose ${err}`));
 
 // Use loan routes for all requests starting with /api/loan
-app.use("/api/loan", LoanRouter);
+app.use("/api/loan", router);
 
 // Accessing PORT
 const PORT = process.env.PORT;
