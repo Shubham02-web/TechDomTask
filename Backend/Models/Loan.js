@@ -22,7 +22,7 @@ const LoanSchema = mongoose.Schema({
   state: {
     type: String,
     default: "PENDING",
-    enum: ["PENDING", "APPROVED", "REJECT"],
+    enum: ["PENDING", "APPROVED", "PAID"],
   },
   //   Creating an array of Repayment Objects field
   repayments: [
@@ -38,6 +38,7 @@ const LoanSchema = mongoose.Schema({
       state: {
         type: String,
         default: "PENDING",
+        enum: ["PENDING", "PAID"],
       },
     },
   ],

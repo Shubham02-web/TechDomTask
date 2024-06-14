@@ -10,14 +10,14 @@ import {
   viewSingleLoan,
 } from "../controller/Loan.js";
 
+// route for repayment
+router.post("/repayment/:id", RepaymentsRoute);
+
 // route for creating Loan /api/loan/create
 router.post("/create", CreateLoan);
 
 // route for approve loan
 router.patch("/approve/:id", approveLoan);
-
-// route for repayment
-router.post("/repayment/:id", RepaymentsRoute);
 
 // route for viewLoan Details
 router.get("/AllLoan", viewLoanDetails);

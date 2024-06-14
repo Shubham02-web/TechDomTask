@@ -126,4 +126,53 @@ export const viewLoanDetails = async function (req, res, next) {
 
 // Controller for repayment Route
 
-export const RepaymentsRoute = async function (req, res, next) {};
+export const RepaymentsRoute = async function (req, res, next) {
+  try {
+    const id = req.params.id;
+    const { amount } = req.body;
+    const Loan = await LoanModel.findById(id);
+    if (!Loan)
+      return res.status(500).json({
+        success: false,
+        message: "Not found an Loan for these Id Or Invalid ID",
+      });
+
+    //   Checking if allready paid
+    if (Loan.state === "PAID")
+      return res.status(200).json({
+        success: true,
+        message: "You have allready paid your LOAN",
+      });
+
+    //   finding and checking loan state and amount
+    const repay = Loan.repayments.find(
+      (r) => r.state === "PENDING" && r.amount <= amount
+    );
+
+    if (repay) {
+      // make state PAID from PENDING
+      repay.state = "PAID";
+
+      //   CHECK EVERY INSTALLMENT STATE IF IT IS PAID THEN SET LOAN PAID FROM PENDING
+      const every = Loan.repayments.every((r) => r.state === "PAID");
+      if (every) Loan.state = "PAID";
+
+      await Loan.save();
+      res.status(200).json({
+        success: true,
+        Loan,
+      });
+    } else {
+      res.status(400).json({
+        success: true,
+        message: "Invalid Amount For Repayment or Installment",
+      });
+    }
+  } catch (error) {
+    console.log("Error in Repayment API");
+    res.status(500).json({
+      success: false,
+      message: `error in Repayment API ${error.message}`,
+    });
+  }
+};
