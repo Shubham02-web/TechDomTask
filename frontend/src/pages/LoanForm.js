@@ -30,4 +30,39 @@ const LoanForm = () => {
       alert("error in creating Loan");
     }
   };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <label>
+        Amount:
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          required
+        />
+      </label>{" "}
+      <label>
+        Term(weeks):
+        <input
+          type="number"
+          value={term}
+          onChange={(e) => setTerm(e.target.value)}
+          required
+        />
+      </label>{" "}
+      <label>
+        Start Date:
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          required
+        />
+      </label>{" "}
+      <button type="submit"> Submit </button>{" "}
+    </form>
+  );
 };
+
+export default LoanForm;
