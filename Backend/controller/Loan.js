@@ -28,6 +28,7 @@ export const CreateLoan = async function (req, res, next) {
     // send response
     res.status(201).json({
       success: true,
+      message: "New Loan Created Successfully",
       newLoan,
     });
   } catch (error) {
@@ -137,18 +138,25 @@ export const RepaymentsRoute = async function (req, res, next) {
         message: "Not found an Loan for these Id Or Invalid ID",
       });
 
+    // Checking amount of Loan Repayment
+
     //   Checking if allready paid
-    if (Loan.state === "PAID")
+    if (Loan.state === "PAID") {
       return res.status(200).json({
         success: true,
         message: "You have allready paid your LOAN",
       });
-
+    }
     //   finding and checking loan state and amount
     const repay = Loan.repayments.find(
       (r) => r.state === "PENDING" && r.amount <= amount
     );
-
+    if (Loan.amount > amount) {
+      return res.status(500).json({
+        success: false,
+        message: "installment  is grater than your amount",
+      });
+    }
     if (repay) {
       // make state PAID from PENDING
       repay.state = "PAID";
@@ -160,6 +168,7 @@ export const RepaymentsRoute = async function (req, res, next) {
       await Loan.save();
       res.status(200).json({
         success: true,
+        message: "You have succesfully paid your Installment",
         Loan,
       });
     } else {
