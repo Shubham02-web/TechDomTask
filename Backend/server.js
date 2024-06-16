@@ -4,7 +4,10 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { router } from "./Routes/Loan.js";
+import Loanrouter from "./Routes/Loan.js";
+import Userrouter from "./Routes/User.js";
+import cookieParser from "cookie-parser";
+
 // config dotenv for Load Environment variables from .env file
 dotenv.config();
 
@@ -12,6 +15,7 @@ dotenv.config();
 const app = express();
 
 // Enabling Cors for all routes
+app.use(cookieParser());
 app.use(cors());
 // use express Json for parsing incoming json requests
 app.use(bodyParser.json());
@@ -23,8 +27,10 @@ mongoose
   .catch((err) => console.log(`Error in conecting mongoose ${err}`));
 
 // Use loan routes for all requests starting with /api/loan
-app.use("/api/loan", router);
+app.use("/api/loan", Loanrouter);
 
+// use User route for all request starting with /api/user
+app.use("/api/user", Userrouter);
 // Accessing PORT
 const PORT = process.env.PORT;
 

@@ -24,6 +24,10 @@ const LoanSchema = mongoose.Schema({
     default: "PENDING",
     enum: ["PENDING", "APPROVED", "PAID"],
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserModel",
+  },
   //   Creating an array of Repayment Objects field
   repayments: [
     {
@@ -45,4 +49,4 @@ const LoanSchema = mongoose.Schema({
 });
 
 // creating and exporting Loan Model
-export const LoanModel = mongoose.model("LoanAPP", LoanSchema);
+export const LoanModel = mongoose.model("LoanModel", LoanSchema);

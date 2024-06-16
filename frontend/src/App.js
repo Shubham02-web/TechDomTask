@@ -5,6 +5,7 @@ import LoanForm from "./pages/LoanForm";
 import LoanList from "./pages/LoanList";
 import RepayLoans from "./pages/repayLoan";
 import "./App.css";
+import UserForm from "./pages/UserForm";
 
 const App = () => {
   return (
@@ -25,6 +26,10 @@ const App = () => {
                 {" "}
                 RepayLoans{" "}
               </Link>{" "}
+              <Link to="/registerUser" className="text-white hover:underline">
+                {" "}
+                User Registration{" "}
+              </Link>{" "}
             </li>{" "}
           </ul>{" "}
         </nav>{" "}
@@ -37,6 +42,9 @@ const App = () => {
               {" "}
             </Route>{" "}
             <Route path="/repay" element={<RepayLoans />}>
+              {" "}
+            </Route>{" "}
+            <Route path="/registerUser" element={<UserForm />}>
               {" "}
             </Route>{" "}
           </Routes>{" "}

@@ -9,20 +9,22 @@ import {
   viewLoanDetails,
   viewSingleLoan,
 } from "../controller/Loan.js";
+import { isAdmin, isAuth } from "../controller/User.js";
 
 // route for repayment
-router.post("/repayment/:id", RepaymentsRoute);
+router.post("/repayment/:id", isAuth, RepaymentsRoute);
 
 // route for creating Loan /api/loan/create
-router.post("/create", CreateLoan);
+router.post("/create", isAuth, CreateLoan);
 
 // route for approve loan
-router.patch("/approve/:id", approveLoan);
+router.patch("/approve/:id", isAuth, isAdmin, approveLoan);
 
 // route for viewLoan Details
-router.get("/AllLoan", viewLoanDetails);
+router.get("/AllLoan", isAuth, isAdmin, viewLoanDetails);
 
 // route for single Loan Detailss
-router.get("/viewLoan/:id", viewSingleLoan);
+router.get("/viewLoan", isAuth, viewSingleLoan);
 
 // Exporting Route
+export default router;
