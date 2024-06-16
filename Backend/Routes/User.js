@@ -19,13 +19,13 @@ router.post("/login", LoginUser);
 router.post("/create", CreateUser);
 
 // route for updating user details
-router.put("/updateuser/:id", updateUser);
+router.put("/updateuser", isAuth, updateUser);
 
 // route for view Users Details
 router.get("/alluser", isAuth, isAdmin, allUser);
 
 // route for single Loan Detailss
-router.get("/viewuser/:id", isAuth, viewSingleUser);
+router.get("/viewuser", isAuth, viewSingleUser);
 
 // Exporting Route
 export default router;

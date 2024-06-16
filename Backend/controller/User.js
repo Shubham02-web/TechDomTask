@@ -62,8 +62,8 @@ export const CreateUser = async function (req, res, next) {
 // controller for all User route
 export const allUser = async function (req, res, next) {
   try {
-    const user = await UserModel.find({});
-    if (!user)
+    const Users = await UserModel.find({});
+    if (!Users)
       return res.status(500).json({
         success: false,
         message: "User is not founded",
@@ -72,7 +72,7 @@ export const allUser = async function (req, res, next) {
     res.status(200).json({
       success: true,
       message: "the list of users",
-      user,
+      Users,
     });
   } catch (error) {
     console.log("Error in All User API");
@@ -87,7 +87,7 @@ export const allUser = async function (req, res, next) {
 export const viewSingleUser = async function (req, res) {
   try {
     // id which is passed as parameter in request
-    const id = req.params.id;
+    const id = req.user._id;
     // finding Loan using these ID
     const User = await UserModel.findById(id);
 
@@ -114,7 +114,7 @@ export const viewSingleUser = async function (req, res) {
 
 export const updateUser = async function (req, res, next) {
   try {
-    const id = req.params.id;
+    const id = req.user._id;
     // finding all User
     const { name, mobile, password, role } = req.body;
     const user = await UserModel.findById(id);
@@ -124,13 +124,13 @@ export const updateUser = async function (req, res, next) {
         message: "There in no User found for these id",
       });
 
-    if (name) return (user.name = name);
-    if (mobile) return (user.mobile = mobile);
+    if (name) user.name = name;
+    if (mobile) user.mobile = mobile;
     if (password) {
       const hashedPass = bcrypt.hash(password);
-      return (user.password = hashedPass);
+      user.password = hashedPass;
     }
-    if (role) return (user.role = role);
+    if (role) user.role = role;
     await user.save();
     const payroll = {
       name,
