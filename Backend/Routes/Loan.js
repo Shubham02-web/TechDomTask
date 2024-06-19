@@ -24,7 +24,7 @@ router.patch("/approve/:id", isAuth, isAdmin, approveLoan);
 router.get("/AllLoan", isAuth, isAdmin, viewLoanDetails);
 
 // route for single Loan Detailss
-router.get("/viewLoan", isAuth, viewSingleLoan);
+router.get("/viewLoan/:id", isAuth, viewSingleLoan);
 
 // Exporting Route
 export default router;

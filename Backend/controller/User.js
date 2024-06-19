@@ -3,7 +3,15 @@ import { UserModel } from "../Models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookie from "cookie-parser";
+import dotenv from "dotenv";
+dotenv.config();
 // Controller for Creating new user
+const createToken = (payload) => {
+  return jwt.sign(payload, process.env.Secret_key, {
+    expiresIn: "5h",
+  });
+};
+
 export const CreateUser = async function (req, res, next) {
   try {
     const { name, mobile, password, role } = req.body;
@@ -12,15 +20,15 @@ export const CreateUser = async function (req, res, next) {
         success: false,
         message: "please enter all fields name , mobile ,and password",
       });
-    // Create new User
-    // Checking Mobile Number Length
-    // if (mobile.length <= 0 && mobile.length > 10)
-    // return res.status(400).json({
-    // success: false,
-    // message:
-    // "Please Enter Valid Mobile Number it is less than or greater than 10 digit",
-    // });
     // Checking Mobile Number
+    // Validate mobile number length
+    // console.log(mobile);
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: `Please enter a valid mobile number of 10 digits that is ${mobile.length} digit `,
+      });
+    }
     const check = await UserModel.findOne({ mobile });
     if (check)
       return res.status(400).json({
@@ -35,15 +43,15 @@ export const CreateUser = async function (req, res, next) {
       role,
     });
     await newUser.save();
-    const payroll = {
-      name,
-      mobile,
-      role,
+    const payload = {
+      name: newUser.name,
+      mobile: newUser.mobile,
     };
 
-    const token = await jwt.sign(payroll, process.env.Secret_key);
+    const token = jwt.sign(payload, process.env.Secret_key);
     // send response
-    res.cookie("token", token).status(201).json({
+    res.cookie("token", token, { httpOnly: true });
+    res.status(201).json({
       success: true,
       message: "User  Created Successfully",
       newUser,
@@ -51,7 +59,7 @@ export const CreateUser = async function (req, res, next) {
     });
   } catch (error) {
     // send error message if got error
-    console.log("error in create User API");
+    console.log(`error in create User API ${error}`);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -62,8 +70,8 @@ export const CreateUser = async function (req, res, next) {
 // controller for all User route
 export const allUser = async function (req, res, next) {
   try {
-    const Users = await UserModel.find({});
-    if (!Users)
+    const newUser = await UserModel.find({});
+    if (!newUser)
       return res.status(500).json({
         success: false,
         message: "User is not founded",
@@ -72,7 +80,7 @@ export const allUser = async function (req, res, next) {
     res.status(200).json({
       success: true,
       message: "the list of users",
-      Users,
+      newUser,
     });
   } catch (error) {
     console.log("Error in All User API");
@@ -89,9 +97,9 @@ export const viewSingleUser = async function (req, res) {
     // id which is passed as parameter in request
     const id = req.user._id;
     // finding Loan using these ID
-    const User = await UserModel.findById(id);
+    const newUser = await UserModel.findById(id);
 
-    if (!User)
+    if (!newUser)
       return res.status(500).json({
         success: false,
         message: "can not find User for these ID please enter a valid ID",
@@ -100,10 +108,10 @@ export const viewSingleUser = async function (req, res) {
     res.status(200).json({
       success: true,
       message: "details of user",
-      User,
+      newUser,
     });
   } catch (error) {
-    console.log("Error in Find User Details Single");
+    console.log(`Error in Find User Details Single ${error.message}`);
     res.status(500).json({
       success: false,
       message: `Error in Find Single User data  ${error.message}`,
@@ -114,34 +122,34 @@ export const viewSingleUser = async function (req, res) {
 
 export const updateUser = async function (req, res, next) {
   try {
-    const id = req.user._id;
+    const id = req.user.id;
     // finding all User
     const { name, mobile, password, role } = req.body;
-    const user = await UserModel.findById(id);
-    if (!user)
+    const newUser = await UserModel.findById(id);
+    if (!newUser)
       return res.status(500).json({
         success: false,
         message: "There in no User found for these id",
       });
 
-    if (name) user.name = name;
-    if (mobile) user.mobile = mobile;
+    if (name) newUser.name = name;
+    if (mobile) newUser.mobile = mobile;
     if (password) {
       const hashedPass = bcrypt.hash(password);
-      user.password = hashedPass;
+      newUser.password = hashedPass;
     }
     if (role) user.role = role;
-    await user.save();
-    const payroll = {
-      name,
-      mobile,
-      role,
+    await newUser.save();
+    const payload = {
+      name: newUser.name,
+      mobile: newUser.mobile,
     };
-    const token = await jwt.sign(payroll, process.env.Secret_key);
-    res.cookie("token", token).status(200).json({
+    const token = await jwt.sign(payload, process.env.Secret_key);
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).json({
       success: true,
       message: "user Updated Succesfully",
-      user,
+      newUser,
       token,
     });
   } catch (error) {
@@ -162,23 +170,30 @@ export const LoginUser = async function (req, res, next) {
         message: "please enter all fields name and mobile",
       });
 
-    const user = await UserModel.find({ name, mobile });
-    if (!user)
+    if (mobile.length !== 10) {
+      return res.status(400).json({
+        success: false,
+        message: `Please enter a valid mobile number of 10 digits that is ${mobile.length} digit `,
+      });
+    }
+    const newUser = await UserModel.findOne({ mobile });
+    if (!newUser)
       return res.status(500).json({
         success: false,
         message: "user not exisst",
       });
-    const payroll = {
+    const payload = {
       name,
-      password: user.password,
       mobile,
-      role: user.role,
     };
-    const token = jwt.sign(payroll, process.env.Secret_key);
-
-    res.cookie("token", token).status(200).json({
+    const token = await jwt.sign(payload, process.env.Secret_key);
+    console.log(token);
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).json({
       success: true,
       message: "login succesfully",
+      token,
+      newUser,
     });
   } catch (error) {
     console.log(error);
@@ -197,13 +212,9 @@ export const isAuth = async function (req, res, next) {
         success: false,
         message: "Token Not Found",
       });
-    const isValid = await jwt.verify(token, process.env.Secret_key);
-    if (!isValid)
-      return res.status(500).json({
-        success: false,
-        message: "you are not authenticated user",
-      });
-    req.user = await UserModel.findOne({ mobile: isValid.mobile });
+    const dec = await jwt.verify(token, process.env.Secret_key);
+    req.user = await UserModel.findOne({ mobile: dec.mobile });
+    console.log(req.user);
     next();
   } catch (error) {
     console.log(error);
@@ -218,11 +229,11 @@ export const isAuth = async function (req, res, next) {
 
 export const isAdmin = async function (req, res, next) {
   try {
-    console.log(req.user);
-    if (req.user.role == "admin") return next();
-    else return res.status(403).json({ message: user });
+    console.log(req.user.role);
+    if (req.user.role === "admin") return next();
+    else return res.status(403).json({ message: req.user.id });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     {
       res.status(500).json({
         success: false,

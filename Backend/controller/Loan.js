@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import express from "express";
+import moment from "moment";
 // Import Loan ModelFrom Models/Loan.js
 import { LoanModel } from "../Models/Loan.js";
 
@@ -10,14 +11,25 @@ export const CreateLoan = async function (req, res, next) {
     if (!amount || !term || !startDate)
       return res.status(400).json({
         success: false,
-        message: "please enter all fields amount , term ,and startDate",
+        message: "please enter all fields amount & term ",
       });
+    // Validate startDate
+    const today = moment().startOf("day");
+    const selectedDate = moment(startDate);
+
+    if (!selectedDate.isSameOrAfter(today)) {
+      return res.status(400).json({
+        success: false,
+        message: "Start date must be today or a future date",
+      });
+    }
+
     //   generate repayment Schedule
     const user = req.user._id;
     const repayments = Array.from({ length: term }, (_, i) => ({
-      dueDate: new Date(
-        new Date(startDate).setDate(new Date(startDate).getDate() + (i + 1) * 7)
-      ),
+      dueDate: moment(startDate)
+        .add(i * 7, "days")
+        .toDate(),
       amount: Math.round((amount / term) * 100) / 100,
     }));
     // const user = req.user._id;
@@ -50,7 +62,7 @@ export const CreateLoan = async function (req, res, next) {
 // controller for Loan approve Route
 export const approveLoan = async function (req, res, next) {
   try {
-    const id = req.params.id;
+    const { id, state } = req.body;
     const loan = await LoanModel.findById(id);
     if (!loan)
       return res.status(500).json({
@@ -62,12 +74,13 @@ export const approveLoan = async function (req, res, next) {
         success: false,
         message: "Your Loan has allready approved",
       });
-    loan.state = "APPROVED";
+    // loan.state = state;
+    loan.state = state;
     await loan.save();
 
     res.status(200).json({
       success: true,
-      message: "Your Loan Approved Successfully",
+      message: `Your Loan ${state} Successfully`,
       loan,
     });
   } catch (error) {
@@ -83,9 +96,10 @@ export const approveLoan = async function (req, res, next) {
 export const viewSingleLoan = async function (req, res) {
   try {
     // id which is passed as parameter in request
-    const id = req.user._id;
+    const { id } = req.params;
+    console.log(id);
     // finding Loan using these ID
-    const Loan = await LoanModel.find({ user: id });
+    const Loan = await LoanModel.findOne({ user: id });
 
     if (!Loan)
       return res.status(500).json({
@@ -98,10 +112,10 @@ export const viewSingleLoan = async function (req, res) {
       Loan,
     });
   } catch (error) {
-    console.log("Error in Find Loan Details Single");
+    console.log(`Error in Find Loan Details Single ${error.message}`);
     res.status(500).json({
       success: false,
-      message: `Error in Find Single Loan data  ${error.message}`,
+      message: `Error in Find Single Loan data ${error.message}`,
     });
   }
 };
@@ -110,7 +124,8 @@ export const viewSingleLoan = async function (req, res) {
 export const viewLoanDetails = async function (req, res, next) {
   try {
     // finding all Loan
-    const Loans = await LoanModel.find({});
+    const Loans = await LoanModel.find({}).populate("user");
+
     if (!Loans)
       return res.status(500).json({
         success: false,
@@ -123,10 +138,10 @@ export const viewLoanDetails = async function (req, res, next) {
       Loans,
     });
   } catch (error) {
-    console.log("error in find all Loans API");
+    console.log(`error in find all Loans API ${error.message}`);
     res.status(500).json({
       success: false,
-      message: `Error in find all Loans  ${error.message}`,
+      message: `Error in find all Loans ${error.message}`,
     });
   }
 };
@@ -187,7 +202,9 @@ export const RepaymentsRoute = async function (req, res, next) {
     console.log("Error in Repayment API");
     res.status(500).json({
       success: false,
-      message: `error in Repayment API ${error.message}`,
+      message: `
+                    error in Repayment API $ { error.message }
+                    `,
     });
   }
 };

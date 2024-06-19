@@ -21,6 +21,7 @@ router.post("/create", CreateUser);
 // route for updating user details
 router.put("/updateuser", isAuth, updateUser);
 
+// router.get("/auth", isAuth);
 // route for view Users Details
 router.get("/alluser", isAuth, isAdmin, allUser);
 

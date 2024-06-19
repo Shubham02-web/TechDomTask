@@ -16,7 +16,12 @@ const app = express();
 
 // Enabling Cors for all routes
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 // use express Json for parsing incoming json requests
 app.use(bodyParser.json());
 
