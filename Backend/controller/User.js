@@ -62,7 +62,7 @@ export const CreateUser = async function (req, res, next) {
     console.log(`error in create User API ${error}`);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: `Error in registering API ${error.message}`,
     });
   }
 };
@@ -86,7 +86,7 @@ export const allUser = async function (req, res, next) {
     console.log("Error in All User API");
     res.status(500).json({
       success: false,
-      message: `error in All User API ${error.message}`,
+      message: `error in fetching All Users ${error.message}`,
     });
   }
 };
@@ -114,7 +114,7 @@ export const viewSingleUser = async function (req, res) {
     console.log(`Error in Find User Details Single ${error.message}`);
     res.status(500).json({
       success: false,
-      message: `Error in Find Single User data  ${error.message}`,
+      message: `Error in fatching Single User data  ${error.message}`,
     });
   }
 };
@@ -153,21 +153,21 @@ export const updateUser = async function (req, res, next) {
       token,
     });
   } catch (error) {
-    console.log("error in find all Loans API");
+    console.log("error in update user API");
     res.status(500).json({
       success: false,
-      message: `Error in find all Loans  ${error.message}`,
+      message: `Error in Update User   ${error.message}`,
     });
   }
 };
 
 export const LoginUser = async function (req, res, next) {
   try {
-    const { name, mobile } = req.body;
-    if (!name || !mobile)
+    const { password, mobile } = req.body;
+    if (!password || !mobile)
       return res.status(500).json({
         success: true,
-        message: "please enter all fields name and mobile",
+        message: "please enter all fields password and mobile",
       });
 
     if (mobile.length !== 10) {
@@ -183,8 +183,8 @@ export const LoginUser = async function (req, res, next) {
         message: "user not exisst",
       });
     const payload = {
-      name,
       mobile,
+      password,
     };
     const token = await jwt.sign(payload, process.env.Secret_key);
     console.log(token);
@@ -199,7 +199,7 @@ export const LoginUser = async function (req, res, next) {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Error in Login API",
+      message: `Error in Login API  ${error.message}`,
     });
   }
 };
@@ -214,7 +214,7 @@ export const isAuth = async function (req, res, next) {
       });
     const dec = await jwt.verify(token, process.env.Secret_key);
     req.user = await UserModel.findOne({ mobile: dec.mobile });
-    console.log(req.user);
+    // console.log(req.user);
     next();
   } catch (error) {
     console.log(error);
@@ -229,7 +229,6 @@ export const isAuth = async function (req, res, next) {
 
 export const isAdmin = async function (req, res, next) {
   try {
-    console.log(req.user.role);
     if (req.user.role === "admin") return next();
     else return res.status(403).json({ message: req.user.id });
   } catch (error) {

@@ -12,20 +12,20 @@ const CreateLoan = () => {
     try {
       e.preventDefault();
       if (!amount || !term || !startDate) throw "Fill all details!";
-      await axios.post("http://localhost:5000/api/loan/create", {
+      await axios.post(`${process.env.REACT_APP_HOST_URL}/api/loan/create`, {
         amount,
         term,
         startDate,
       });
-      alert("Loan creation successful!");
+      alert("You have successFully requested for new Loan");
       navigate("/");
     } catch (error) {
       if (error.name === "AxiosError") {
         console.error(error.response.data.message);
         return alert(error.response.data.message);
       }
-      console.error(error);
-      alert(`Can't create the loan!\nError: ${error}`);
+      console.error(`cant create the loan ${error.message}`);
+      alert(error.respose.data.message);
     }
   };
 

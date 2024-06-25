@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Login = () => {
-  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
   const { setNewUser, setToken, setLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -13,12 +13,12 @@ const Login = () => {
   const handleLogin = async (e) => {
     try {
       e.preventDefault();
-      if (!name || !mobile) throw "Please fill all fields!";
+      if (!mobile || !password) throw "Please fill all fields!";
       const response = await axios.post(
-        "http://localhost:5000/api/user/login",
+        `${process.env.REACT_APP_HOST_URL}/api/user/login`,
         {
-          name,
           mobile,
+          password,
         }
       );
       setNewUser(response.user);
@@ -27,34 +27,33 @@ const Login = () => {
       localStorage.setItem("token", response.token);
       navigate("/");
     } catch (error) {
-      if (error.name === "AxiosError") {
-        console.log(error.response.data.message);
-        return alert(error.response.data.message);
-      }
-      console.error(error);
-      alert(`Can't login!\nError: ${error}`);
+      console.log(error.message);
+      return alert(error.response.data.message);
     }
   };
   return (
-    <div className="max-w-md mx-auto mt-10">
+    <div className="max-w-md mx-auto mt-28">
       <h2 className="text-2xl font-bold mb-4"> Login </h2>{" "}
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow-md">
-        <label className="block mb-2">
-          Name:
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="block w-full mt-1 p-2 border rounded"
-          />
-        </label>{" "}
-        <label className="block mb-2">
-          Mobile:
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-6 rounded shadow-md mt-10"
+      >
+        <label className="block mb-5 text-start">
+          Mobile
           <input
             type="number"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
+            required
+            className="block w-full mt-1 p-2 border rounded"
+          />
+        </label>{" "}
+        <label className="block mb-5 text-start">
+          Password
+          <input
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
             className="block w-full mt-1 p-2 border rounded"
           />

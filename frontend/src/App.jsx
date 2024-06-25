@@ -7,34 +7,29 @@ import CreateLoan from "./components/CreateLoan";
 import axios from "axios";
 import "rsuite/dist/rsuite.min.css";
 import "./App.css";
-
+import ToastContainer from "rsuite/esm/toaster/ToastContainer";
+import "react-toastify/dist/ReactToastify.css";
+import dotenv from "dotenv";
+dotenv.config();
 export const AuthContext = createContext();
 
+console.log(process.env.REACT_APP_HOST_URL);
 function App() {
   const [isLoggedIn, setLoggedIn] = useState(false);
   const [newUser, setNewUser] = useState(null); // Initialize newUser as null initially
   const [token, setToken] = useState(null); // Initialize token as null initially
-
-  // eslint-disable-next-line no-unused-vars
-  const navigate = (path) => {
-    window.location.pathname = path;
-  };
-
-  axios.defaults.withCredentials = true;
   const fetchUser = async (token) => {
     try {
-      console.log(token);
       const userDetails = await axios.get(
-        "http://localhost:5000/api/user/viewuser"
+        `${process.env.REACT_APP_HOST_URL}/api/user/viewuser`
       );
-      console.log(userDetails.data.role);
-      if (!userDetails.data) throw new Error("No user found");
-      setNewUser(userDetails.data.newUser);
+
+      setNewUser(userDetails?.data?.newUser);
       setToken(token);
       setLoggedIn(true);
     } catch (err) {
       console.error(err);
-      // Handle error, e.g., redirect to login page if token is invalid or user not found
+      alert(`invalid token or user not found\n ${err.response.data.message}`);
       setLoggedIn(false);
       setNewUser(null);
       setToken(null);
@@ -84,6 +79,7 @@ function App() {
           setToken,
         }}
       >
+        <ToastContainer />
         <RouterProvider router={router} />
       </AuthContext.Provider>
     </>

@@ -18,7 +18,7 @@ const Signup = () => {
       if (!name || !password || !mobile) throw "Please fill all fields!";
 
       const responese = await axios.post(
-        "http://localhost:5000/api/user/create",
+        `${process.env.REACT_APP_HOST_URL}/api/user/create`,
         {
           name,
           password,
@@ -46,7 +46,7 @@ const Signup = () => {
         <h2 className="text-2xl font-bold mb-4">Signup</h2>
         <form className="space-y-4" onSubmit={handleSignup}>
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-sm font-medium text-gray-600 text-start">
               Name:
             </label>
             <input
@@ -58,7 +58,7 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-sm font-medium text-gray-600 text-start">
               Mobile:
             </label>
             <input
@@ -70,7 +70,7 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">
+            <label className="block text-sm font-medium text-gray-600 text-start">
               Password:
             </label>
             <input

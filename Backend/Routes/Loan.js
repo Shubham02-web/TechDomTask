@@ -7,7 +7,7 @@ import {
   RepaymentsRoute,
   approveLoan,
   viewLoanDetails,
-  viewSingleLoan,
+  viewSingleUserLoan,
 } from "../controller/Loan.js";
 import { isAdmin, isAuth } from "../controller/User.js";
 
@@ -24,7 +24,7 @@ router.patch("/approve/:id", isAuth, isAdmin, approveLoan);
 router.get("/AllLoan", isAuth, isAdmin, viewLoanDetails);
 
 // route for single Loan Detailss
-router.get("/viewLoan/:id", isAuth, viewSingleLoan);
+router.get("/viewLoan", isAuth, viewSingleUserLoan);
 
 // Exporting Route
 export default router;

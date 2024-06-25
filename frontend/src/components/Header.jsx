@@ -18,10 +18,14 @@ const Header = () => {
 
   return (
     <Navbar>
-      <Navbar.Brand href="/">Loan Application</Navbar.Brand>
+      <Navbar.Brand href="/" className="font-bold">
+        Loan Application
+      </Navbar.Brand>
       <Nav>
         <Nav.Item href="/">View Loans</Nav.Item>
-        <Nav.Item href="/CreateLoan">Apply Loan</Nav.Item>
+        {newUser?.role !== "admin" && (
+          <Nav.Item href="/CreateLoan">Apply Loan</Nav.Item>
+        )}
       </Nav>
       <Nav pullRight>
         <Nav.Menu
@@ -30,7 +34,7 @@ const Header = () => {
           renderToggle={renderToggle}
         >
           <Nav.Item>{newUser?.name}</Nav.Item>
-
+          <Nav.Item>{newUser?.role}</Nav.Item>
           <Nav.Item onClickCapture={handleLogout}>
             <ExitIcon /> LogOut
           </Nav.Item>

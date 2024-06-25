@@ -11,7 +11,7 @@ export const CreateLoan = async function (req, res, next) {
     if (!amount || !term || !startDate)
       return res.status(400).json({
         success: false,
-        message: "please enter all fields amount & term ",
+        message: "please enter all fields amount , term & date",
       });
     // Validate startDate
     const today = moment().startOf("day");
@@ -46,7 +46,7 @@ export const CreateLoan = async function (req, res, next) {
     // send response
     res.status(201).json({
       success: true,
-      message: "New Loan request Successfully",
+      message: "New Loan requested Successfully",
       newLoan,
     });
   } catch (error) {
@@ -54,7 +54,7 @@ export const CreateLoan = async function (req, res, next) {
     console.log(`error in request/create Loan API ${error.message}`);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: `Error in requesting for Loan ${error.message}`,
     });
   }
 };
@@ -62,19 +62,32 @@ export const CreateLoan = async function (req, res, next) {
 // controller for Loan approve Route
 export const approveLoan = async function (req, res, next) {
   try {
-    const { id, state } = req.body;
+    const { id } = req.params;
+    const { state } = req.body;
     const loan = await LoanModel.findById(id);
     if (!loan)
       return res.status(500).json({
         success: false,
         message: "Loan is not found for these id Please enter valid id",
       });
-    if (loan.state === "APPROVED")
+    if (loan.state === "PAID")
+      return res.status(400).json({
+        success: false,
+        message: "Loan has Allready Paid",
+      });
+
+    if (state == "APPROVED" && loan.state == "APPROVED")
       return res.status(500).json({
         success: false,
         message: "Your Loan has allready approved",
       });
-    // loan.state = state;
+
+    if (state == "REJECTED" && loan.state == "REJECTED")
+      return res.status(500).json({
+        success: false,
+        message: "Your Loan has allready Rejected",
+      });
+
     loan.state = state;
     await loan.save();
 
@@ -93,13 +106,14 @@ export const approveLoan = async function (req, res, next) {
 };
 
 // controller for view a single loan detail
-export const viewSingleLoan = async function (req, res) {
+export const viewSingleUserLoan = async function (req, res) {
   try {
     // id which is passed as parameter in request
-    const { id } = req.params;
-    console.log(id);
+    console.log(req.user);
+    const { _id } = req.user;
+    console.log(_id);
     // finding Loan using these ID
-    const Loan = await LoanModel.findOne({ user: id });
+    const Loan = await LoanModel.find({ user: _id });
 
     if (!Loan)
       return res.status(500).json({
@@ -109,6 +123,7 @@ export const viewSingleLoan = async function (req, res) {
 
     res.status(200).json({
       success: true,
+      message: `Loan Found Successfully`,
       Loan,
     });
   } catch (error) {
@@ -124,9 +139,9 @@ export const viewSingleLoan = async function (req, res) {
 export const viewLoanDetails = async function (req, res, next) {
   try {
     // finding all Loan
-    const Loans = await LoanModel.find({}).populate("user");
+    const Loan = await LoanModel.find({}).populate("user");
 
-    if (!Loans)
+    if (!Loan)
       return res.status(500).json({
         success: false,
         message: "There in no Loan",
@@ -135,7 +150,7 @@ export const viewLoanDetails = async function (req, res, next) {
     res.status(200).json({
       success: true,
       message: "list of all Loans",
-      Loans,
+      Loan,
     });
   } catch (error) {
     console.log(`error in find all Loans API ${error.message}`);
@@ -153,58 +168,93 @@ export const RepaymentsRoute = async function (req, res, next) {
     const id = req.params.id;
     const { amount } = req.body;
     const Loan = await LoanModel.findById(id);
-    if (!Loan)
+    if (!Loan) {
       return res.status(500).json({
         success: false,
-        message: "Not found an Loan for these Id Or Invalid ID",
+        message: "Not found a Loan for this ID or Invalid ID",
       });
+    }
 
-    // Checking amount of Loan Repayment
-
-    //   Checking if allready paid
+    // Checking if the loan is already paid
     if (Loan.state === "PAID") {
       return res.status(200).json({
         success: true,
-        message: "You have allready paid your LOAN",
+        message: "You have already paid your LOAN",
       });
     }
-    //   finding and checking loan state and amount
-    const repay = Loan.repayments.find(
-      (r) => r.state === "PENDING" && r.amount <= amount
-    );
-    if (Loan.amount > amount) {
+
+    // Checking if the loan is approved
+    if (Loan.state !== "APPROVED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "The loan is not approved. You can only make repayments on approved loans.",
+      });
+    }
+
+    // Find the next pending installment
+    const nextInstallment = Loan.repayments.find((r) => r.state === "PENDING");
+    if (!nextInstallment) {
       return res.status(500).json({
         success: false,
-        message: "installment  is grater than your amount",
+        message: "No pending installments found",
       });
     }
-    if (repay) {
-      // make state PAID from PENDING
-      repay.state = "PAID";
 
-      //   CHECK EVERY INSTALLMENT STATE IF IT IS PAID THEN SET LOAN PAID FROM PENDING
-      const every = Loan.repayments.every((r) => r.state === "PAID");
-      if (every) Loan.state = "PAID";
+    // Total remaining amount of the loan
+    const remainingAmount = Loan.repayments.reduce(
+      (acc, repay) => acc + (repay.state === "PENDING" ? repay.amount : 0),
+      0
+    );
 
-      await Loan.save();
-      res.status(200).json({
-        success: true,
-        message: "You have succesfully paid your Installment",
-        Loan,
-      });
-    } else {
-      res.status(400).json({
-        success: true,
-        message: "Invalid Amount For Repayment or Installment",
+    // Check if the entered amount is less than the next installment amount
+    if (amount < nextInstallment.amount) {
+      return res.status(400).json({
+        success: false,
+        message: "The amount is less than the next installment due",
       });
     }
+
+    // Check if the entered amount is greater than the remaining loan amount
+    if (amount > remainingAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "The amount is greater than the total remaining loan amount",
+      });
+    }
+
+    let remainingRepaymentAmount = amount;
+    for (let repay of Loan.repayments) {
+      if (repay.state === "PENDING") {
+        if (remainingRepaymentAmount >= repay.amount) {
+          remainingRepaymentAmount -= repay.amount;
+          repay.state = "PAID";
+          // repay.amount = 0; // Set the installment amount to 0 after it's paid
+        } else {
+          repay.amount -= remainingRepaymentAmount;
+          remainingRepaymentAmount = 0;
+          break; // Break the loop as the repayment amount is exhausted
+        }
+      }
+    }
+
+    // Check if all repayments are paid, then mark the loan as PAID
+    const allPaid = Loan.repayments.every((r) => r.state === "PAID");
+    if (allPaid) {
+      Loan.state = "PAID";
+    }
+
+    await Loan.save();
+    res.status(200).json({
+      success: true,
+      message: "You have successfully paid your installment(s)",
+      Loan,
+    });
   } catch (error) {
-    console.log("Error in Repayment API");
+    console.log("Error in Repayment API", error);
     res.status(500).json({
       success: false,
-      message: `
-                    error in Repayment API $ { error.message }
-                    `,
+      message: `Error in Repayment API: ${error.message}`,
     });
   }
 };
