@@ -1,8 +1,5 @@
-# React + Vite
+create .env file and add varible
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+VITE_REACT_APP_HOST_URL=with you are url
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+and please install all dependecies to run these using npm install
