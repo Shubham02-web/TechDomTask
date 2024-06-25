@@ -229,7 +229,7 @@ export const RepaymentsRoute = async function (req, res, next) {
         if (remainingRepaymentAmount >= repay.amount) {
           remainingRepaymentAmount -= repay.amount;
           repay.state = "PAID";
-          // repay.amount = 0; // Set the installment amount to 0 after it's paid
+          repay.amount = amount;
         } else {
           repay.amount -= remainingRepaymentAmount;
           remainingRepaymentAmount = 0;
@@ -247,7 +247,7 @@ export const RepaymentsRoute = async function (req, res, next) {
     await Loan.save();
     res.status(200).json({
       success: true,
-      message: "You have successfully paid your installment(s)",
+      message: `Repayment Succesful of amount  ${amount}`,
       Loan,
     });
   } catch (error) {

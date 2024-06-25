@@ -1,12 +1,13 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../App";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { base_url } from "../config";
 
 const Login = () => {
   const [password, setPassword] = useState("");
   const [mobile, setMobile] = useState("");
-  const { setNewUser, setToken, setLoggedIn } = useContext(AuthContext);
+  const { setNewUser, setToken } = useContext(AuthContext);
   const navigate = useNavigate();
 
   axios.defaults.withCredentials = true;
@@ -14,32 +15,29 @@ const Login = () => {
     try {
       e.preventDefault();
       if (!mobile || !password) throw "Please fill all fields!";
-      const response = await axios.post(
-        `${process.env.REACT_APP_HOST_URL}/api/user/login`,
-        {
-          mobile,
-          password,
-        }
-      );
-      setNewUser(response.user);
-      setToken(response.token);
-      setLoggedIn(true);
-      localStorage.setItem("token", response.token);
+      const response = await axios.post(`${base_url}/api/user/login`, {
+        mobile,
+        password,
+      });
+      console.log(response);
+      setNewUser(response.data.newUser);
+      setToken(response.data.token);
+      localStorage.setItem("token", response.data.token);
       navigate("/");
     } catch (error) {
-      console.log(error.message);
       return alert(error.response.data.message);
     }
   };
   return (
     <div className="max-w-md mx-auto mt-28">
-      <h2 className="text-2xl font-bold mb-4"> Login </h2>{" "}
+      <h1 className="text-3xl font-bold mb-4">Loan Application</h1>
       <form
         onSubmit={handleLogin}
         className="bg-white p-6 rounded shadow-md mt-10"
       >
+        <h2 className="text-2xl font-bold mb-4"> Login </h2>{" "}
         <label className="block mb-5 text-start">
-          Mobile
+          Mobile <span className="text-red-600">*</span>
           <input
             type="number"
             value={mobile}
@@ -49,7 +47,7 @@ const Login = () => {
           />
         </label>{" "}
         <label className="block mb-5 text-start">
-          Password
+          Password <span className="text-red-600">*</span>
           <input
             type="text"
             value={password}
@@ -67,12 +65,12 @@ const Login = () => {
         </button>{" "}
       </form>{" "}
       <div className="mt-4">
-        <a
-          href="/Signup"
+        <NavLink
+          to="/Signup"
           className="text-blue-500 hover:text-blue-700 focus:outline-none focus:underline"
         >
-          new User register here?
-        </a>
+          New user? Register here
+        </NavLink>
       </div>
     </div>
   );

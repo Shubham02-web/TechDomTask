@@ -1,34 +1,34 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../App";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { base_url } from "../config";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
-  const { setLoggedIn, setToken, setNewUser } = useContext(AuthContext);
+  const { setToken, setNewUser } = useContext(AuthContext);
 
   axios.defaults.withCredentials = true;
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
       e.preventDefault();
-      if (!name || !password || !mobile) throw "Please fill all fields!";
+      if (!name || !password || !mobile || !confirmPassword)
+        throw "Please fill all fields!";
 
-      const responese = await axios.post(
-        `${process.env.REACT_APP_HOST_URL}/api/user/create`,
-        {
-          name,
-          password,
-          mobile,
-        }
-      );
-      setNewUser(responese.newUser);
-      setToken(responese.token);
-      setLoggedIn(true);
-      localStorage.setItem("token", responese.token);
+      const responese = await axios.post(`${base_url}/api/user/create`, {
+        name,
+        password,
+        confirmPassword,
+        mobile,
+      });
+      setNewUser(responese.data.newUser);
+      setToken(responese.data.token);
+      localStorage.setItem("token", responese.data.token);
       navigate("/");
     } catch (error) {
       if (error.name === "AxiosError") {
@@ -47,7 +47,7 @@ const Signup = () => {
         <form className="space-y-4" onSubmit={handleSignup}>
           <div>
             <label className="block text-sm font-medium text-gray-600 text-start">
-              Name:
+              Name <span className="text-red-600">*</span>
             </label>
             <input
               type="text"
@@ -59,7 +59,7 @@ const Signup = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-600 text-start">
-              Mobile:
+              Mobile <span className="text-red-600">*</span>
             </label>
             <input
               type="number"
@@ -71,12 +71,24 @@ const Signup = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-600 text-start">
-              Password:
+              Password <span className="text-red-600">*</span>
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 p-2 w-full border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 text-start">
+              Confirm Password <span className="text-red-600">*</span>
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 p-2 w-full border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               required
             />
@@ -89,12 +101,12 @@ const Signup = () => {
           </button>
         </form>
         <div className="mt-4">
-          <a
-            href="/login"
+          <NavLink
+            to="/login"
             className="text-blue-500 hover:text-blue-700 focus:outline-none focus:underline"
           >
             Already have an account?
-          </a>
+          </NavLink>
         </div>
       </div>
     </div>

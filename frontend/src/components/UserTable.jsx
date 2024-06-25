@@ -1,10 +1,10 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Drawer, Table, Input, Modal, Form, Tag } from "rsuite";
-import { AuthContext } from "../App";
 import Column from "rsuite/esm/Table/TableColumn";
 import { Cell, HeaderCell } from "rsuite-table";
 import moment from "moment";
+import { base_url } from "../config";
 
 const UserTable = () => {
   const [loan, setLoan] = useState([]);
@@ -16,28 +16,23 @@ const UserTable = () => {
     amount: null,
     state: "PENDING",
   });
-  const { newUser } = useContext(AuthContext);
   const [sortColumn, setSortColumn] = useState();
   const [sortType, setSortType] = useState();
   const [loading, setLoading] = useState(false);
   const [totalLoanAmount, setTotalLoanAmount] = useState(0);
   const [totalPaidAmount, setTotalPaidAmount] = useState(0);
   const [totalRemainingAmount, setTotalRemainingAmount] = useState(0);
-  const [repaymentsId, setRepaymentsId] = useState(null);
 
   axios.defaults.withCredentials = true;
 
-  const fetchLoans = async () => {
+  const fetchUserLoans = async () => {
     try {
       setLoading(true);
-      let response = await axios.get(
-        `${process.env.REACT_APP_HOST_URL}/api/loan/viewLoan`
-      );
+      let response = await axios.get(`${base_url}/api/loan/viewLoan`);
       setLoading(false);
       setLoan(response.data.Loan);
 
       const loans = response.data.Loan;
-      console.log(response.data.Loan);
       const totalAmount = loans.reduce((acc, loan) => acc + loan.amount, 0);
       setTotalLoanAmount(totalAmount);
 
@@ -64,13 +59,13 @@ const UserTable = () => {
 
   const handleRepaymentSubmit = async () => {
     try {
-      await axios.post(
-        `${process.env.REACT_APP_HOST_URL}/api/loan/repayment/${selectedLoanId}`,
+      const response = await axios.post(
+        `${base_url}/api/loan/repayment/${selectedLoanId}`,
         repaymentDetails
       );
-      alert("Repayment successful");
+      alert(response.data.message);
       setRepaymentOpen(false);
-      fetchLoans();
+      fetchUserLoans();
     } catch (error) {
       console.error(error);
       alert(`${error.response.data.message}`);
@@ -78,7 +73,7 @@ const UserTable = () => {
   };
 
   useEffect(() => {
-    fetchLoans();
+    fetchUserLoans();
   }, []);
 
   const handleRowClick = (rowData) => {
@@ -165,8 +160,8 @@ const UserTable = () => {
           </Cell>
         </Column>
         <Column width={250}>
-          <HeaderCell>Check dueDates</HeaderCell>
-          <Cell>Click Me</Cell>
+          <HeaderCell>Due Dates</HeaderCell>
+          <Cell className="text-blue-700 hover:underline">Click Me</Cell>
         </Column>
       </Table>
       {selectedLoanId && (

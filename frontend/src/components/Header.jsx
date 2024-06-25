@@ -1,30 +1,55 @@
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Avatar } from "rsuite";
 import ExitIcon from "@rsuite/icons/Exit";
 
 import { AuthContext } from "../App";
 const renderToggle = (props) => <Avatar size="sm" circle {...props} />;
 const Header = () => {
-  const { newUser, setLoggedIn, setNewUser } = useContext(AuthContext);
+  const { newUser, setNewUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const handleLogout = () => {
     // Clear local storage and navigate to login page
     localStorage.removeItem("token");
-    setLoggedIn(false);
     setNewUser(null);
     navigate("/login");
   };
 
   return (
-    <Navbar>
-      <Navbar.Brand href="/" className="font-bold">
+    <Navbar appearance="subtle">
+      <Navbar.Brand to="/" className="font-bold">
         Loan Application
       </Navbar.Brand>
       <Nav>
-        <Nav.Item href="/">View Loans</Nav.Item>
+        <Nav.Item>
+          <NavLink
+            to={"/"}
+            style={({ isActive, isTransitioning }) => {
+              return {
+                fontWeight: isActive ? "bold" : "",
+                color: !isActive ? "" : "blue",
+                viewTransitionName: isTransitioning ? "slide" : "",
+              };
+            }}
+          >
+            View Loans
+          </NavLink>
+        </Nav.Item>
         {newUser?.role !== "admin" && (
-          <Nav.Item href="/CreateLoan">Apply Loan</Nav.Item>
+          <Nav.Item>
+            <NavLink
+              to="/CreateLoan"
+              style={({ isActive, isTransitioning }) => {
+                return {
+                  fontWeight: isActive ? "bold" : "",
+                  color: !isActive ? "" : "blue",
+                  viewTransitionName: isTransitioning ? "slide" : "",
+                };
+              }}
+            >
+              Apply Loan
+            </NavLink>
+          </Nav.Item>
         )}
       </Nav>
       <Nav pullRight>

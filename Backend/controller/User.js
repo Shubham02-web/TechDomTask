@@ -14,20 +14,32 @@ const createToken = (payload) => {
 
 export const CreateUser = async function (req, res, next) {
   try {
-    const { name, mobile, password, role } = req.body;
-    if (!name || !mobile || !password)
+    const { name, mobile, password, confirmPassword, role } = req.body;
+    if (!name || !mobile || !password || !confirmPassword)
       return res.status(500).json({
         success: false,
         message: "please enter all fields name , mobile ,and password",
       });
-    // Checking Mobile Number
-    // Validate mobile number length
-    // console.log(mobile);
     if (mobile.length !== 10) {
       return res.status(400).json({
         success: false,
         message: `Please enter a valid mobile number of 10 digits that is ${mobile.length} digit `,
       });
+    }
+
+    // Checking Password Length
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long.",
+      });
+    }
+
+    // Comparing Password
+    if (password !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match." });
     }
     const check = await UserModel.findOne({ mobile });
     if (check)

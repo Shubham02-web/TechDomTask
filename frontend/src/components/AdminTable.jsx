@@ -4,6 +4,7 @@ import { Button, Drawer, Table, Tag } from "rsuite";
 import Column from "rsuite/esm/Table/TableColumn";
 import moment from "moment";
 import { Cell, HeaderCell } from "rsuite-table";
+import { base_url } from "../config";
 const AdminTable = () => {
   const [loan, setLoan] = useState([]);
   const [terms, setTerms] = useState([]);
@@ -17,13 +18,12 @@ const AdminTable = () => {
   const [approvedLoans, setApprovedLoans] = useState(0);
   const [rejectedLoans, setRejectedLoans] = useState(0);
   const [pendingLoans, setPendingLoans] = useState(0);
+  const [paidLoans, setPaidLoans] = useState(0);
 
-  const fetchLoans = async () => {
+  const fetchAllLoans = async () => {
     try {
       setLoading(true);
-      let response = await axios.get(
-        `${process.env.REACT_APP_HOST_URL}/api/loan/AllLoan`
-      );
+      let response = await axios.get(`${base_url}/api/loan/AllLoan`);
       setLoading(false);
       console.log(response);
       setLoan(response.data.Loan);
@@ -36,22 +36,20 @@ const AdminTable = () => {
       setRejectedLoans(
         loans.filter((loan) => loan.state === "REJECTED").length
       );
+      setPaidLoans(loans.filter((loan) => loan.state === "PAID").length);
       setPendingLoans(loans.filter((loan) => loan.state === "PENDING").length);
     } catch (error) {
       setLoading(false);
       alert(`loading Loan Details \n please refresh the page`);
     }
   };
-  const updateStatus = async (id, status) => {
+  const updateLoanStatus = async (id, status) => {
     try {
-      await axios.patch(
-        `${process.env.REACT_APP_HOST_URL}/api/loan/approve/${id}`,
-        {
-          state: status,
-        }
-      );
+      await axios.patch(`${base_url}/api/loan/approve/${id}`, {
+        state: status,
+      });
       alert(`Updated the loan status to ${status}`);
-      fetchLoans(); // Refresh data
+      fetchAllLoans(); // Refresh data
       setOpen(false); // Close the drawer
     } catch (error) {
       console.log(error);
@@ -59,7 +57,7 @@ const AdminTable = () => {
     }
   };
   useEffect(() => {
-    fetchLoans();
+    fetchAllLoans();
   }, []);
 
   const handleRowClick = (rowData) => {
@@ -104,6 +102,7 @@ const AdminTable = () => {
         <h4>Approved Loans: {approvedLoans}</h4>
         <h4>Rejected Loans: {rejectedLoans}</h4>
         <h4>Pending Loans: {pendingLoans}</h4>
+        <h4>Total Paid Loans : {paidLoans}</h4>
       </div>
       <Table
         className="m-5 mt-3 cursor-pointer"
@@ -190,14 +189,14 @@ const AdminTable = () => {
               <Button
                 color="green"
                 appearance="primary"
-                onClick={() => updateStatus(selectedLoanId, "APPROVED")}
+                onClick={() => updateLoanStatus(selectedLoanId, "APPROVED")}
               >
                 Approve
               </Button>
               <Button
                 color="red"
                 appearance="primary"
-                onClick={() => updateStatus(selectedLoanId, "REJECTED")}
+                onClick={() => updateLoanStatus(selectedLoanId, "REJECTED")}
               >
                 Reject
               </Button>
