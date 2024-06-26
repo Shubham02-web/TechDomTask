@@ -9,7 +9,7 @@ import "rsuite/dist/rsuite.min.css";
 import "./App.css";
 import ToastContainer from "rsuite/esm/toaster/ToastContainer";
 import { base_url } from "./config";
-import "react-toastify/dist/ReactToastify.css";
+// import "react-toastify/dist/ReactToastify.css";
 export const AuthContext = createContext();
 
 function App() {
@@ -22,7 +22,7 @@ function App() {
       setNewUser(userDetails?.data?.newUser);
       setToken(token);
     } catch (err) {
-      alert(`invalid token or user not found\n ${err.response.data.message}`);
+      
       setNewUser(null);
       setToken(null);
     }
