@@ -11,7 +11,7 @@ export const CreateLoan = async function (req, res, next) {
     if (!amount || !term || !startDate)
       return res.status(400).json({
         success: false,
-        message: "please enter all fields amount , term & date",
+        message: "please enter all fields amount , term & startDate",
       });
     // Validate startDate
     const today = moment().startOf("day");
