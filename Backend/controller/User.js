@@ -18,7 +18,7 @@ export const CreateUser = async function (req, res, next) {
     if (!name || !mobile || !password || !confirmPassword)
       return res.status(500).json({
         success: false,
-        message: "please enter all fields name , mobile ,and password",
+        message: "please enter all fields name , mobile , password and confirmPassword",
       });
     if (mobile.length !== 10) {
       return res.status(400).json({
